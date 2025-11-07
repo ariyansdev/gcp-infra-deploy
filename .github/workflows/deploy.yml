@@ -34,7 +34,7 @@ jobs:
 
       # 🧱 Configure Docker authentication for Artifact Registry
       - name: Configure Docker authentication
-        run: gcloud auth configure-docker --quiet ${{ vars.GCP_REGION }}-docker.pkg.dev
+        run: gcloud auth configure-docker --quiet gcr.io,${{ vars.GCP_REGION }}-docker.pkg.dev
 
       # 🏗️ Build and push Docker image
       - name: Build and Push Image
