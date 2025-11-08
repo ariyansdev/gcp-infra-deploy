@@ -1,54 +1,54 @@
-name: Deploy GCS Bucket
+# name: Deploy GCS Bucket
 
-on:
-  push:
-    branches:
-      - main
+# on:
+#   push:
+#     branches:
+#       - main
 
-permissions:
-  contents: read
-  id-token: write  # Required for Workload Identity Federation
+# permissions:
+#   contents: read
+#   id-token: write  # Required for Workload Identity Federation
 
-jobs:
-  deploy-bucket:
-    name: Create GCS Bucket
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy-bucket:
+#     name: Create GCS Bucket
+#     runs-on: ubuntu-latest
 
-    steps:
-      # 1️⃣ Checkout source code (optional if you have infra files)
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       # 1️⃣ Checkout source code (optional if you have infra files)
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      # 2️⃣ Authenticate to Google Cloud
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          token_format: access_token
-          workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
+#       # 2️⃣ Authenticate to Google Cloud
+#       - name: Authenticate to Google Cloud
+#         uses: google-github-actions/auth@v2
+#         with:
+#           token_format: access_token
+#           workload_identity_provider: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+#           service_account: ${{ vars.GCP_SERVICE_ACCOUNT_EMAIL }}
 
-      # 3️⃣ Set up gcloud SDK
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
+#       # 3️⃣ Set up gcloud SDK
+#       - name: Setup gcloud
+#         uses: google-github-actions/setup-gcloud@v2
+#         with:
+#           project_id: ${{ vars.GCP_PROJECT_ID }}
 
-      # 4️⃣ Create or update GCS bucket
-      - name: Create GCS bucket
-        run: |
-          BUCKET_NAME="my-deploy-bucket-${{ vars.GCP_PROJECT_ID }}"
-          LOCATION="${{ vars.GCP_REGION }}"
-          echo "Deploying bucket: gs://$BUCKET_NAME in region $LOCATION"
+#       # 4️⃣ Create or update GCS bucket
+#       - name: Create GCS bucket
+#         run: |
+#           BUCKET_NAME="my-deploy-bucket-${{ vars.GCP_PROJECT_ID }}"
+#           LOCATION="${{ vars.GCP_REGION }}"
+#           echo "Deploying bucket: gs://$BUCKET_NAME in region $LOCATION"
 
-          # Check if bucket exists
-          if gcloud storage buckets describe gs://$BUCKET_NAME >/dev/null 2>&1; then
-            echo "Bucket already exists, skipping creation."
-          else
-            echo "Creating bucket..."
-            gcloud storage buckets create gs://$BUCKET_NAME \
-              --location=$LOCATION \
-              --project=${{ vars.GCP_PROJECT_ID }} \
-              --uniform-bucket-level-access
-          fi
+#           # Check if bucket exists
+#           if gcloud storage buckets describe gs://$BUCKET_NAME >/dev/null 2>&1; then
+#             echo "Bucket already exists, skipping creation."
+#           else
+#             echo "Creating bucket..."
+#             gcloud storage buckets create gs://$BUCKET_NAME \
+#               --location=$LOCATION \
+#               --project=${{ vars.GCP_PROJECT_ID }} \
+#               --uniform-bucket-level-access
+#           fi
 
-          echo "✅ Deployment complete!"
+#           echo "✅ Deployment complete!"
