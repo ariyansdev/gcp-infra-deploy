@@ -1,85 +1,85 @@
-name: Terraform Plan & Apply (stg)
+# name: Terraform Plan & Apply (stg)
 
-on:
-  pull_request:
-    branches:
-      - main       # Run plan when PR targets main
-  push:
-    branches:
-      - main       # Run plan + apply after merge to main
+# on:
+#   pull_request:
+#     branches:
+#       - main       # Run plan when PR targets main
+#   push:
+#     branches:
+#       - main       # Run plan + apply after merge to main
 
-permissions:
-  id-token: write       # Required for Workload Identity Federation
-  contents: read
-  pull-requests: write  # Needed to comment on PRs
+# permissions:
+#   id-token: write       # Required for Workload Identity Federation
+#   contents: read
+#   pull-requests: write  # Needed to comment on PRs
 
-jobs:
-  terraform:
-    name: Terraform Plan & Apply (GCP)
-    runs-on: ubuntu-latest
+# jobs:
+#   terraform:
+#     name: Terraform Plan & Apply (GCP)
+#     runs-on: ubuntu-latest
 
-    steps:
-      # 🧾 Checkout source code
-      - name: Checkout code
-        uses: actions/checkout@v4
+#     steps:
+#       # 🧾 Checkout source code
+#       - name: Checkout code
+#         uses: actions/checkout@v4
 
-      # 🔐 Authenticate to Google Cloud via Workload Identity Federation
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v2
-        with:
-          token_format: access_token
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
+#       # 🔐 Authenticate to Google Cloud via Workload Identity Federation
+#       - name: Authenticate to Google Cloud
+#         id: auth
+#         uses: google-github-actions/auth@v2
+#         with:
+#           token_format: access_token
+#           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+#           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
-      # ⚙️ Setup gcloud SDK
-      - name: Setup gcloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+#       # ⚙️ Setup gcloud SDK
+#       - name: Setup gcloud SDK
+#         uses: google-github-actions/setup-gcloud@v2
+#         with:
+#           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # 🧱 Setup Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.7
+#       # 🧱 Setup Terraform
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: 1.9.7
 
-      # 🪣 Initialize Terraform with GCS backend
-      - name: Terraform Init
-        working-directory: ./terraform
-        run: terraform init
-        env:
-          GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+#       # 🪣 Initialize Terraform with GCS backend
+#       - name: Terraform Init
+#         working-directory: ./terraform
+#         run: terraform init
+#         env:
+#           GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
-      # 🧮 Terraform Plan (for PRs and main)
-      - name: Terraform Plan
-        id: plan
-        working-directory: ./terraform
-        run: terraform plan -input=false -var="project_id=${{ secrets.GCP_PROJECT_ID }}"
-        env:
-          GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+#       # 🧮 Terraform Plan (for PRs and main)
+#       - name: Terraform Plan
+#         id: plan
+#         working-directory: ./terraform
+#         run: terraform plan -input=false -var="project_id=${{ secrets.GCP_PROJECT_ID }}"
+#         env:
+#           GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
 
-      # 💬 Comment Plan Output on PR
-      - name: Comment Plan on PR
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          header: terraform-plan
-          message: |
-            ### Terraform Plan Output (stg)
-            ```
-            ${{ steps.plan.outputs.stdout }}
-            ```
+#       # 💬 Comment Plan Output on PR
+#       - name: Comment Plan on PR
+#         if: github.event_name == 'pull_request'
+#         uses: marocchino/sticky-pull-request-comment@v2
+#         with:
+#           header: terraform-plan
+#           message: |
+#             ### Terraform Plan Output (stg)
+#             ```
+#             ${{ steps.plan.outputs.stdout }}
+#             ```
 
-      # 🚀 Terraform Apply (only on push to main)
-      - name: Terraform Apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        working-directory: ./terraform
-        run: |
-          echo "Re-running Terraform Plan before Apply..."
-          terraform plan -input=false -var="project_id=${{ secrets.GCP_PROJECT_ID }}" -out=tfplan
+#       # 🚀 Terraform Apply (only on push to main)
+#       - name: Terraform Apply
+#         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#         working-directory: ./terraform
+#         run: |
+#           echo "Re-running Terraform Plan before Apply..."
+#           terraform plan -input=false -var="project_id=${{ secrets.GCP_PROJECT_ID }}" -out=tfplan
 
-          echo "Applying latest Terraform Plan..."
-          terraform apply -auto-approve tfplan
-        env:
-          GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+#           echo "Applying latest Terraform Plan..."
+#           terraform apply -auto-approve tfplan
+#         env:
+#           GOOGLE_OAUTH_ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
