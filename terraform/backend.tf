@@ -1,7 +1,10 @@
 terraform {
-  backend "gcs" {
-    bucket = "my-deploy-bucket-ariyans-learning-hub"
-    prefix = "envs/dev/terraform.tfstate"
+  cloud {
+    organization = "gcp-ariyans"
+
+    workspaces {
+      name = "terraform-gcp-backend-resources" # 👈 your Terraform Cloud workspace
+    }
   }
 
   required_providers {
