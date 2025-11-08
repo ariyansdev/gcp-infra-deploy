@@ -10,7 +10,7 @@ variable "region" {
 }
 
 resource "google_storage_bucket" "demo" {
-  name     = "ariyansappdev777711-${var.project_id}"
+  name     = "ariyansappdev77771212111-${var.project_id}"
   location = upper(var.region)
   uniform_bucket_level_access = true
 }
