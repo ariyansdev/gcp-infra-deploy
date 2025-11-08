@@ -13,7 +13,8 @@ on:
       - main       # Run plan + apply after merge to main
 jobs:
   terraform:
-    uses: LearnTechOps/Reusable-Templates/.github/workflows/terraform-gcp-template.yml@main
+    uses: LearnTechOps/Reusable-Templates/.github/workflows/terraform_gcp_backend_template.yaml@main
+
     with:
       terraform_dir: "./terraform"
       tfvars_file: "./envs/dev.tfvars"
