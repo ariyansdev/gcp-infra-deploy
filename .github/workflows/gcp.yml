@@ -5,8 +5,12 @@ permissions:
   contents: read
 
 on:
-  workflow_dispatch:
-
+  pull_request:
+    branches:
+      - main       # Run plan when PR targets main
+  push:
+    branches:
+      - main       # Run plan + apply after merge to main
 jobs:
   terraform:
     uses: LearnTechOps/Reusable-Templates/.github/workflows/terraform-gcp-template.yml@main
