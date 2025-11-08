@@ -3,6 +3,12 @@ provider "google" {
   region  = var.region
 }
 
+terraform {
+  backend "gcs" {
+    bucket = "my-deploy-bucket-ariyans-learning-hub"
+    prefix = "dev/terraform.tfstate"  # this is like a folder for your environment's state
+  }
+
 variable "project_id" {}
 variable "region" {
   default = "us-central1"
